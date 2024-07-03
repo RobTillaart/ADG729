@@ -15,7 +15,6 @@ ADG729::ADG729(uint8_t deviceAddress, TwoWire *wire)
   _address  = deviceAddress;
   _wire     = wire;
   _mask     = 0x00;
-  _resetPin = -1;
   _forced   = false;
   _error    = ADG729_OK;
   _channels = 8;
@@ -43,6 +42,11 @@ uint8_t ADG729::channelCount()
 }
 
 
+
+///////////////////////////////////////////////////////
+//
+//  Single channel interface
+//
 bool ADG729::enableChannel(uint8_t channel)
 {
   if (channel >= _channels) return false;
@@ -77,6 +81,52 @@ bool ADG729::disableAllChannels()
 }
 
 
+///////////////////////////////////////////////////////
+//
+//  Dual channel interface
+//
+bool ADG729::enableAB(uint8_t channel)
+{
+  if (channel >= 4) return false;
+  return setChannelMask(_mask | (0x11 << channel));
+}
+
+
+bool ADG729::disableAB(uint8_t channel)
+{
+  if (channel >= 4) return false;
+  return setChannelMask(_mask & ~(0x11 << channel));
+}
+
+
+bool ADG729::selectAB(uint8_t channel)
+{
+  if (channel >= 4) return false;
+  return setChannelMask(0x11 << channel);
+}
+
+
+bool ADG729::isEnabledAB(uint8_t channel)
+{
+  if (channel >= 4) return false;
+  uint8_t tmp = (0x11 << channel);
+  return ((_mask & tmp) == tmp);
+}
+
+
+bool ADG729::select(uint8_t A, uint8_t B)
+{
+  if (A >= 4) return false;
+  if (B >= 4) return false;
+  uint8_t tmp = (1 << A) | (1 << (B+4));
+  return setChannelMask(tmp);
+}
+
+
+///////////////////////////////////////////////////////
+//
+//  Workers
+//
 bool ADG729::setChannelMask(uint8_t mask)
 {
   if ((_mask == mask) && (not _forced)) return true;
@@ -99,25 +149,10 @@ uint8_t ADG729::getChannelMask()
 }
 
 
-void ADG729::setResetPin(uint8_t resetPin)
-{
-  _resetPin = resetPin;
-  pinMode(_resetPin, OUTPUT);
-  digitalWrite(_resetPin, HIGH);  //  page 3 HIGH is normal operation
-}
-
-
-void ADG729::reset()
-{
-  if (_resetPin != -1)
-  {
-    digitalWrite(_resetPin, LOW);
-    delayMicroseconds(1);
-    digitalWrite(_resetPin, HIGH);
-  }
-}
-
-
+///////////////////////////////////////////////////////
+//
+//  Misc
+//
 void ADG729::setForced(bool forced)
 {
   _forced = forced;

@@ -18,16 +18,19 @@ Arduino Library for I2C ADG729 matrix switch. 2x4 Multiplexer.
 
 **Experimental**
 
-Library for the ADG729 8 channel multiplexer.
+Library for the ADG729 dual 2x4 channel multiplexer.
 
-The library allows you to enable 0 to 7 channels uniquely or simultaneously.
-In fact the ADG729 is therefore a **switch**, although often named a multiplexer.
+The library allows you to select 0 to 8 switches uniquely or simultaneously.
+These 8 switches are arranged in 2x4 switches to multiplex 2 lines A and B.
+Both the A and B switches can be in 16 states, from 0000 - 1111.
 
 The library caches the channels enabled, and if a channel is enabled,
 it will not be enabled again (low level) to optimize performance.
 This can however be overruled.
 
 The device works with 2.3 V to 5.5 V so it should work with most MCU's.
+
+Note: By connecting line A and B the ADG729 can act like an ADG728.
 
 **Warning**
 
@@ -67,6 +70,16 @@ Other multiplexers
 #include "ADG729.h"
 ```
 
+#### Interaction models
+
+**Warning**
+
+There are two interaction models with the ADG729. 
+These exist of single-channel and dual-channel functions. 
+Note that mixing these two interaction models might complicate the logic of your code. 
+However it is allowed.
+
+
 #### Constructor
 
 - **ADG729(const uint8_t deviceAddress, TwoWire \*wire = &Wire)** Constructor.
@@ -75,9 +88,9 @@ deviceAddress = 0x4C .. 0x4F, wire = Wire or WireN.
 - **bool isConnected()** returns true if address of the multiplexer is found on I2C bus.
 
 
-#### Channel functions
+#### Single channel functions
 
-All "channel functions" return true on success.
+All channel functions return true on success.
 
 - **bool enableChannel(uint8_t channel)** enables channel 0 .. 7 **non-exclusive**.  
 Multiple channels can be enabled in parallel.
@@ -88,18 +101,37 @@ All other channels will be disabled in the same call, so not before or after.
 - **bool isEnabled(uint8_t channel)** returns true if the channel is enabled.
 - **bool disableAllChannels()** fast way to disable all channels.
 
+
+#### Dual Channel functions
+
+All channel functions return true on success.
+
+These functions set channels in pairs, the same channel for both A and B.
+The advantage of the dual channel functions is that the switches are set simultaneously.
+These functions are ideal e.g. to multiplex I2C or RS232 as these are buses
+use two wires.
+
+- **bool enableAB(uint8_t channel)** enables channel 0 .. 3 for both A and B **non-exclusive**.
+- **bool disableAB(uint8_t channel)** disables channel 0 .. 3 for both A and B .
+Will not disable other channels.
+- **bool selectAB(uint8_t channel)** enables a single channel 0 .. 3 **exclusive**.  
+All other channels will be disabled in the same call, so not before or after.
+- **bool isEnabledAB(uint8_t channel)** returns true if the channel is enabled for both A and B.
+
+The **select()** function sets the A and B switch uniquely and independently at the same time.
+It allows e.g. to make a routing matrix, if one connects A and B together.
+Now one can select which A connects to which B, in total 4 x 4 possibilities.
+
+- **bool select(uint8_t A, uint8_t B)** A, B = 0..3
+
+
+#### Mask functions
+
 Multiple channels can also be enabled in one call with a mask.
+These functions do the hard work for the single and dual channel functions.
 
 - **bool setChannelMask(uint8_t mask)** enables 0 or more channels simultaneously with a bit mask.
 - **uint8_t getChannelMask()** reads back the bit mask of the channels enabled.
-
-
-#### Reset
-
-Optional the library can reset the device.
-
-- **void setResetPin(uint8_t resetPin)** sets the pin to reset the chip.
-- **void reset()** trigger the reset pin.
 
 
 #### Debug

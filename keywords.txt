@@ -16,11 +16,14 @@ selectChannel	KEYWORD2
 isEnabled	KEYWORD2
 disableAllChannels	KEYWORD2
 
+enableAB	KEYWORD2
+disableAB	KEYWORD2
+selectAB	KEYWORD2
+isEnabledAB	KEYWORD2
+select	KEYWORD2
+
 setChannelMask	KEYWORD2
 getChannelMask	KEYWORD2
-
-setResetPin	KEYWORD2
-reset	KEYWORD2
 
 setForced	KEYWORD2
 getForced	KEYWORD2

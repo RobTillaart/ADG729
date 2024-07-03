@@ -32,13 +32,23 @@ public:
   bool    begin(uint8_t mask = 0x00);         //  default no channels enabled
   bool    isConnected();                      //  find address on I2C bus
 
-  //  channel = 0..channelCount()-1
+  //  channel = 0..7
   uint8_t channelCount();
   bool    enableChannel(uint8_t channel);     //  enable channel NON exclusive
   bool    disableChannel(uint8_t channel);
   bool    selectChannel(uint8_t channel);     //  enable channel exclusive
   bool    isEnabled(uint8_t channel);
   bool    disableAllChannels();
+
+  //  channel = 0..3
+  //  sets both A and B with the same value.
+  bool    enableAB(uint8_t channel);
+  bool    disableAB(uint8_t channel);
+  bool    selectAB(uint8_t channel);
+  bool    isEnabledAB(uint8_t channel);
+  //  A, B = 0..3
+  //  sets A and B separately and uniquely.
+  bool    select(uint8_t A, uint8_t B);
 
 
   //  mask = 0x00 .. 0xFF - every bit is a channel.
@@ -48,9 +58,6 @@ public:
   bool    setChannelMask(uint8_t mask);
   uint8_t getChannelMask();
 
-  //  reset
-  void    setResetPin(uint8_t resetPin);
-  void    reset();     //  trigger reset pin
 
   //  set forced IO (default false)
   void    setForced(bool forced = false);
@@ -62,8 +69,7 @@ public:
 protected:
   uint8_t   _address;
   TwoWire*  _wire;
-  uint8_t   _mask;             //  caching mask = status of channels
-  uint8_t   _resetPin;         //  default not set == -1 (255)
+  uint8_t   _mask;    //  caching mask = status of channels
   bool      _forced;
   int       _error;
   uint8_t   _channels;
