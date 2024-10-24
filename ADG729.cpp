@@ -36,7 +36,7 @@ bool ADG729::isConnected()
 }
 
 
-bool ADG729::getAddress()
+uint8_t ADG729::getAddress()
 {
   return _address;
 }
